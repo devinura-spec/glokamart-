@@ -2,31 +2,26 @@
 
 namespace App\Models;
 
-// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
-     * The attributes that are mass assignable.
-     *
-     * @var list<string>
+     * Kolom yang boleh diisi
      */
     protected $fillable = [
         'name',
         'email',
         'password',
+        'role_id',
     ];
 
     /**
-     * The attributes that should be hidden for serialization.
-     *
-     * @var list<string>
+     * Kolom tersembunyi
      */
     protected $hidden = [
         'password',
@@ -34,15 +29,35 @@ class User extends Authenticatable
     ];
 
     /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
+     * Cast
      */
-    protected function casts(): array
+    protected $casts = [
+        'email_verified_at' => 'datetime',
+        'password' => 'hashed',
+    ];
+
+    /**
+     * Relasi ke user_details
+     */
+    public function detail()
     {
-        return [
-            'email_verified_at' => 'datetime',
-            'password' => 'hashed',
-        ];
+        return $this->hasOne(UserDetail::class);
     }
+
+    public function role()
+{
+    return $this->belongsTo(Role::class);
+}
+
+public function messagesSent()
+{
+    return $this->hasMany(\App\Models\ChatMessage::class, 'user_id');
+}
+
+public function messagesReceived()
+{
+    return $this->hasMany(\App\Models\ChatMessage::class, 'receiver_id');
+}
+
+
 }

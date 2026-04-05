@@ -1,0 +1,174 @@
+<x-app-layout>
+    <x-slot name="header">
+        <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            🛒 Keranjang Belanja
+        </h2>
+    </x-slot>
+
+    @php
+        $cart = session('cart', []);
+        $total = 0;
+    @endphp
+
+    <div class="py-12 bg-gray-100 dark:bg-gray-900 min-h-screen">
+        <div class="max-w-5xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
+                <div class="p-6 text-gray-900 dark:text-gray-100">
+
+                    {{-- KERANJANG KOSONG --}}
+                    @if(empty($cart))
+                        <p class="text-gray-600 dark:text-gray-400 mb-6">
+                            Keranjang masih kosong. Yuk belanja dulu!
+                        </p>
+
+                        <a href="{{ route('home') }}"
+                           class="px-5 py-3 bg-yellow-500 hover:bg-yellow-600 text-white rounded-lg shadow">
+                           ← Kembali ke Beranda
+                        </a>
+                    @else
+
+                    {{-- FORM CHECKOUT PRODUK TERPILIH --}}
+                    <form action="{{ route('cart.checkoutSelected') }}" method="POST">
+                        @csrf
+
+                        <table class="w-full mb-6">
+                            <thead>
+                                <tr class="border-b border-gray-300 dark:border-gray-700">
+                                    {{-- CHECKBOX PILIH SEMUA --}}
+                                    <th class="py-3 text-center">
+                                        <input type="checkbox" id="select-all" class="w-5 h-5 text-yellow-500">
+                                    </th>
+                                    <th class="py-3 text-left">Produk</th>
+                                    <th class="py-3 text-center">Harga</th>
+                                    <th class="py-3 text-center">Qty</th>
+                                    <th class="py-3 text-center">Subtotal</th>
+                                    <th class="py-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                @foreach($cart as $id => $item)
+                                    @php
+                                        $subtotal = $item['price'] * $item['qty'];
+                                        $total += $subtotal;
+                                    @endphp
+                                <tr>
+                                    <td class="py-3 text-center">
+                                        <input type="checkbox"
+                                            name="cart_ids[]"
+                                            value="{{ $id }}"
+                                            class="w-5 h-5 text-yellow-500 item-checkbox"
+                                            checked>
+                                    </td>
+
+                                    <td class="py-3">{{ $item['name'] }}</td>
+
+                                    <td class="py-3 text-center">
+                                        Rp {{ number_format($item['price'], 0, ',', '.') }}
+                                    </td>
+
+                                    <td class="py-3 text-center">{{ $item['qty'] }}</td>
+
+                                    <td class="py-3 text-center">
+                                        Rp {{ number_format($subtotal, 0, ',', '.') }}
+                                    </td>
+
+                                    <td class="py-3 text-center">
+                                        <button
+                                            type="submit"
+                                            formaction="{{ route('cart.remove', $id) }}"
+                                            formmethod="POST"
+                                            class="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600">
+                                            @csrf
+                                            @method('DELETE')
+                                            Hapus
+                                        </button>
+                                    </td>
+                                </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+{{-- TOTAL + CHECKOUT --}}
+                            <div class="flex flex-col sm:flex-row justify-between items-center p-6 bg-gray-50 dark:bg-gray-700 rounded-lg mt-6 shadow-inner space-y-3 sm:space-y-0">
+                                <h3 class="text-xl font-bold text-gray-900 dark:text-gray-100">
+                                    💰 Total: Rp <span x-text="total.toLocaleString('id-ID')"></span>
+                                </h3>
+
+                                <button type="submit" class="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg shadow font-semibold transition">
+                                    Checkout Produk Terpilih →
+                                </button>
+                            </div>
+                        </form>
+
+                        <script>
+                            function cartComponent() {
+                                return {
+                                    total: 0,
+                                    initCart() {
+                                        this.updateTotal();
+                                    },
+                                    updateTotal() {
+                                        let sum = 0;
+                                        document.querySelectorAll('tr[x-data]').forEach(row => {
+                                            const data = row.__x.$data;
+                                            if(data.selected) sum += data.subtotal;
+                                        });
+                                        this.total = sum;
+                                    },
+                                    toggleAll(event) {
+                                        const checked = event.target.checked;
+                                        document.querySelectorAll('tr[x-data]').forEach(row => row.__x.$data.selected = checked);
+                                        this.updateTotal();
+                                    },
+                                    removeItem(id) {
+                                        if(!confirm('Hapus produk ini?')) return;
+                                        fetch(`/cart/remove/${id}`, {
+                                            method: 'DELETE',
+                                            headers: {
+                                                'X-CSRF-TOKEN': '{{ csrf_token() }}',
+                                                'Accept': 'application/json'
+                                            }
+                                        }).then(res => {
+                                            if(res.ok){
+                                                document.querySelector(`tr[x-data][x-data-id="${id}"]`)?.remove();
+                                                this.updateTotal();
+                                            }
+                                        });
+                                    }
+                                }
+                            }
+
+                            function productRow(id, qty, price) {
+                                return {
+                                    id, qty, price,
+                                    subtotal: qty * price,
+                                    selected: true,
+                                    increase() { this.qty++; this.updateSubtotal(); },
+                                    decrease() { if(this.qty>1) this.qty--; this.updateSubtotal(); },
+                                    updateSubtotal() {
+                                        this.subtotal = this.qty * this.price;
+                                        this.$root.updateTotal();
+                                    }
+                                }
+                            }
+                        </script>
+
+                    </form>
+
+                    {{-- SCRIPT PILIH SEMUA --}}
+                    <script>
+                        const selectAll = document.getElementById('select-all');
+                        const itemCheckboxes = document.querySelectorAll('.item-checkbox');
+
+                        selectAll.addEventListener('change', function() {
+                            itemCheckboxes.forEach(cb => cb.checked = selectAll.checked);
+                        });
+                    </script>
+
+                    @endif
+
+                </div>
+            </div>
+        </div>
+    </div>
+</x-app-layout>
