@@ -23,13 +23,15 @@ $stats = [
 
 @section('content')
 <!-- 🔥 FLOATING BUTTON SCAN -->
+
 <button onclick="startScanner()"
     class="fixed bottom-6 right-6 bg-red-500 hover:bg-red-600 text-white w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-2xl z-50">
     📷
 </button>
 
-<!-- SCANNER MODAL -->
+<!-- 🔥 SCANNER MODAL -->
 <div id="scanner" class="hidden fixed inset-0 bg-black bg-opacity-90 z-50 flex items-center justify-center">
+    
     <div id="preview" class="w-full max-w-md h-80 bg-black rounded"></div>
 
     <!-- tombol close -->
@@ -39,60 +41,48 @@ $stats = [
     </button>
 </div>
 
-<!-- HTML5 QR Code Library -->
+<!-- 🔥 LIBRARY QR -->
 <script src="https://unpkg.com/html5-qrcode"></script>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
+
 <script>
 let html5QrCode;
 
 async function startScanner() {
     document.getElementById('scanner').classList.remove('hidden');
 
-    // Ambil daftar kamera
-    const cameras = await Html5Qrcode.getCameras();
-
-    let cameraId;
-    if(cameras.length === 0){
-        alert("Tidak ada kamera terdeteksi!");
-        return;
-    }
-
-    // Pilih kamera otomatis
-    // Coba kamera belakang dulu
-    cameraId = cameras.find(cam => /back|environment/i.test(cam.label))?.id
-               || cameras[0].id; // fallback ke kamera pertama
-
     html5QrCode = new Html5Qrcode("preview");
 
     html5QrCode.start(
-        cameraId,
-        { fps: 10, qrbox: 300 },
+        { facingMode: "environment" },
+        {
+            fps: 10,
+            qrbox: 250
+        },
         (decodedText) => {
-            console.log("Hasil scan:", decodedText);
+            console.log("QR:", decodedText);
+
+            // 🔥 DEBUG BIAR KELIATAN
+            alert("Scan berhasil: " + decodedText);
+
             stopScanner();
 
-            // Kirim ke backend
-            fetch(`/scan/${decodedText}`)
-                .then(res => res.text())
-                .then(html => {
-                    document.body.innerHTML = html;
-                    window.print();
-                });
+            // 🔥 FINAL REDIRECT (AMAN)
+            const kode = decodedText.trim();
+            window.location.href = "/scan/" + encodeURIComponent(kode);
         },
-        (errorMessage) => {
-            // opsional: log error scan, jangan spam
-            console.log("Scan error:", errorMessage);
-        }
+        (error) => {}
     );
 }
 
 function stopScanner() {
     document.getElementById('scanner').classList.add('hidden');
-    if(html5QrCode) html5QrCode.stop();
+    if (html5QrCode) {
+        html5QrCode.stop().catch(err => console.log(err));
+    }
 }
 </script>
-
 
 
 

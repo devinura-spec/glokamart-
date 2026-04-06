@@ -195,10 +195,15 @@ Route::prefix('admin')->group(function () {
     Route::delete('/banner/{id}', [BannerController::class, 'destroy'])->name('admin.banner.delete');
 });
 
-Route::get('/scan-page', function() {
-    return view('scan');
-});
-Route::get('/scan/{kode}', [TransaksiController::class, 'scan']);
+// Halaman scan QR / invoice
+Route::get('/scan/{kode}', [TransaksiController::class, 'scan'])
+    ->name('transaksi.scan')
+    ->middleware('auth');
+
+// Halaman invoice normal
+Route::get('/transaksi/{invoice_code}/invoice', [TransaksiController::class, 'invoice'])
+    ->name('transaksi.invoice')
+    ->middleware('auth');
 // ====================
 // AUTH (BREEZE)
 // ====================
