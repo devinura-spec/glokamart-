@@ -3,6 +3,8 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Order;
+use App\Models\OrderDetail;
 
 class CheckoutController extends Controller
 {
@@ -26,7 +28,9 @@ class CheckoutController extends Controller
     public function process(Request $request)
     {
         $request->validate([
-            'payment' => 'required'
+            'payment' => 'required',
+             
+            
         ]);
 
         $cart = session('cart', []);
@@ -41,13 +45,24 @@ class CheckoutController extends Controller
         }, $cart));
 
         // Simpan data order terakhir (sementara pakai session)
-        session([
-            'last_order' => [
-                'items'   => $cart,
-                'total'   => $total,
-                'payment' => $request->payment
-            ]
-        ]);
+      $order = Order::create([
+    'user_id'        => auth()->id(),
+    'total_price'    => $total + 10000, // ongkir
+    'payment_status' => 'pending',       // default status
+    'payment_method' => $request->payment,
+   
+]);
+
+
+foreach ($cart as $id => $item) {
+    OrderDetail::create([
+        'order_id'   => $order->id,
+        'product_id' => $id,
+        'qty'        => $item['qty'],
+        'price'      => $item['price'],
+    ]);
+};
+      
 
         // Kosongkan keranjang
         session()->forget('cart');

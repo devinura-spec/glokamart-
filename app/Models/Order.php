@@ -16,6 +16,7 @@ class Order extends Model
         'product_id',
         'total_price',
         'payment_status',
+        
     ];
 
     // RELASI KE USER

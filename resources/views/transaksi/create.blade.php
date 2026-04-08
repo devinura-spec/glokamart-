@@ -17,9 +17,7 @@ Periksa kembali detail penyewaan sebelum melakukan pembayaran
 </p>
 </div>
 
-
 <div class="grid lg:grid-cols-2 gap-10">
-
 
 <!-- ================= -->
 <!-- DETAIL PRODUK -->
@@ -45,7 +43,6 @@ class="w-full h-56 object-cover">
 
 </div>
 @endif
-
 
 <div class="p-8">
 
@@ -75,18 +72,16 @@ Tipe sewa :
 </div>
 </div>
 
-
 <!-- ================= -->
 <!-- FORM TRANSAKSI -->
 <!-- ================= -->
 
 <div class="bg-white rounded-3xl shadow-2xl p-8">
 
-<form action="{{ route('transaksi.store') }}" method="POST">
+<form action="{{ route('transaksi.store') }}" method="POST" onsubmit="return validasiForm()">
 @csrf
 
 <input type="hidden" name="product_id" value="{{ $product->id }}">
-
 
 @if($product->rent_type == 'hour')
 
@@ -100,9 +95,9 @@ Waktu Mulai
 <input type="datetime-local"
 name="start_time"
 id="start_time"
+required
 class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-400 outline-none">
 </div>
-
 
 <div>
 <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -112,6 +107,7 @@ Waktu Selesai
 <input type="datetime-local"
 name="end_time"
 id="end_time"
+required
 class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-400 outline-none">
 </div>
 
@@ -129,6 +125,7 @@ Waktu Mulai
 <input type="datetime-local"
 name="start_date"
 id="start_date"
+required
 class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-400 outline-none">
 </div>
 
@@ -140,6 +137,7 @@ Waktu Selesai
 <input type="datetime-local"
 name="end_date"
 id="end_date"
+required
 class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-400 outline-none">
 </div>
 
@@ -147,11 +145,7 @@ class="w-full border rounded-xl px-4 py-3 focus:ring-2 focus:ring-blue-400 outli
 
 @endif
 
-
 <!-- DURASI -->
-
-<!-- DURASI PENYEWAAN -->
-
 <div class="mb-5">
 
 <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -169,7 +163,6 @@ readonly>
 </div>
 
 <!-- TOTAL -->
-
 <div class="mb-7">
 
 <label class="block text-sm font-semibold text-gray-700 mb-2">
@@ -183,14 +176,12 @@ readonly>
 
 <input type="hidden"
 name="total_price"
-id="total">
+id="total"
+required>
 
 </div>
 
-
-
 <!-- METODE PEMBAYARAN -->
-
 <div class="mb-7">
 
 <label class="block font-semibold text-gray-700 mb-4">
@@ -200,50 +191,37 @@ Metode Pembayaran
 <div class="space-y-3">
 
 <label class="payment flex gap-3 border-2 rounded-2xl p-4 cursor-pointer hover:border-blue-400 transition">
-
-<input type="radio" name="payment_method" value="qris">
-
+<input type="radio" name="payment_method" value="qris" required>
 <div>
 <p class="font-semibold">QRIS</p>
 <p class="text-sm text-gray-500">
 GoPay, DANA, OVO, ShopeePay
 </p>
 </div>
-
 </label>
 
-
 <label class="payment flex gap-3 border-2 rounded-2xl p-4 cursor-pointer hover:border-blue-400 transition">
-
 <input type="radio" name="payment_method" value="transfer">
-
 <div>
 <p class="font-semibold">Transfer Bank</p>
 <p class="text-sm text-gray-500">
 BCA • BRI • Mandiri
 </p>
 </div>
-
 </label>
 
-
 <label class="payment flex gap-3 border-2 rounded-2xl p-4 cursor-pointer hover:border-blue-400 transition">
-
 <input type="radio" name="payment_method" value="cod">
-
 <div>
 <p class="font-semibold">Bayar di Tempat</p>
 <p class="text-sm text-gray-500">
 Cash / COD
 </p>
 </div>
-
 </label>
 
 </div>
 </div>
-
-
 
 <button type="submit"
 class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:scale-105 transition transform text-white py-4 rounded-2xl font-semibold shadow-lg">
@@ -258,9 +236,7 @@ class="w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:scale-105 transit
 </div>
 
 <script>
-
 document.addEventListener("DOMContentLoaded", function(){
-
 let price = {{ $product->price }};
 
 function hitung(){
@@ -279,7 +255,6 @@ let start = new Date(startVal);
 let end = new Date(endVal);
 
 let diffMs = end - start;
-
 if(diffMs <= 0) return;
 
 let diffHours = diffMs / (1000 * 60 * 60);
@@ -304,23 +279,29 @@ document.getElementById("total_display").value =
 "Rp " + total.toLocaleString("id-ID");
 
 document.getElementById("total").value = total;
-
 }
 
 // ambil semua input tanggal
-["start_date","end_date","start_date","end_date"].forEach(function(id){
-
+["start_date","end_date","start_time","end_time"].forEach(function(id){
 let el = document.getElementById(id);
-
 if(el){
 el.addEventListener("input", hitung);
 el.addEventListener("change", hitung);
 }
-
 });
 
 });
-
 </script>
+<script>
+function validasiForm(){
+let total = document.getElementById("total").value;
 
+if(!total || total <= 0){
+alert("Isi tanggal dulu ya");
+return false;
+}
+
+return true;
+}
+</script>
 @endsection

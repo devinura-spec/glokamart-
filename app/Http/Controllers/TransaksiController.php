@@ -6,6 +6,7 @@ use App\Models\Product;
 use App\Models\Transaksi;
 use App\Models\Order; 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TransaksiController extends Controller
 {
@@ -23,51 +24,66 @@ class TransaksiController extends Controller
     // ==========================
     // SIMPAN TRANSAKSI + QR CODE
     // ==========================
-    public function store(Request $request)
-    {
-        // 1️⃣ Validasi input
-  $request->validate([
-    'product_id'     => 'required|exists:products,id',
-    'total_price'    => 'required|numeric|min:1',
-    'payment_method' => 'required|in:qris,transfer,cod',
-]);
+public function store(Request $request)
+{
+    // VALIDASI DASAR
+    $request->validate([
+        'product_id'     => 'required|exists:products,id',
+        'total_price'    => 'required|numeric|min:1',
+        'payment_method' => 'required|in:qris,transfer,cod',
+    ]);
 
-        // 2️⃣ Ambil tanggal dari form (opsional)
-        $start = $request->start_date ?? $request->start_time ?? null;
-        $end   = $request->end_date ?? $request->end_time ?? null;
+    // AMBIL DATA PRODUCT
+    $product = \App\Models\Product::findOrFail($request->product_id);
 
-        // 3️⃣ Generate invoice
-        $invoice = 'INV-' . date('Ymd') . '-' . rand(1000,9999);
+    // VALIDASI TANGGAL
+    if ($product->rent_type == 'hour') {
 
-        // 4️⃣ Tentukan status default
-        $payment_status = 'pending'; // ini bisa dibaca oleh admin/petugas
+        $request->validate([
+            'start_time' => 'required|date',
+            'end_time'   => 'required|date|after:start_time',
+        ]);
 
-       $transaksi = Transaksi::create([
-    'user_id' => auth()->id(), // 🔥 WAJIB
-    'product_id' => $request->product_id,
-    'invoice_code' => $invoice,
-    'start_date' => $start,
-    'end_date' => $end,
-    'total_price' => $request->total_price,
-    'payment_method' => $request->payment_method,
-    'payment_status' => $payment_status,
-]);
+        $start = $request->start_time;
+        $end   = $request->end_time;
 
+    } else {
 
+        $request->validate([
+            'start_date' => 'required|date',
+            'end_date'   => 'required|date|after:start_date',
+        ]);
 
-        // 7️⃣ Redirect ke invoice
-        return redirect()->route('transaksi.invoice', $transaksi->id);
+        $start = $request->start_date;
+        $end   = $request->end_date;
     }
 
-    // ==========================
-    // HALAMAN INVOICE
-    // ==========================
-    public function invoice($id)
-    {
-        $transaksi = Transaksi::with('product','user')->findOrFail($id);
-        return view('transaksi.invoice', compact('transaksi'));
-    }
+    // 🔥 TAMBAHKAN INI (WAJIB)
+    $invoice = 'INV-' . date('Ymd') . '-' . rand(1000,9999);
 
+    $transaksi = Transaksi::create([
+        'user_id' => auth()->id(),
+        'product_id' => $request->product_id,
+        'invoice_code' => $invoice,
+        'start_date' => $start,
+        'end_date' => $end,
+        'total_price' => $request->total_price,
+        'payment_method' => $request->payment_method,
+        'payment_status' => 'pending',
+    ]);
+
+    // BARU REDIRECT
+    return redirect()->route('transaksi.invoice', $transaksi->invoice_code);
+}
+
+public function invoice($invoice_code)
+{
+    $transaksi = Transaksi::with('product','user')
+        ->where('invoice_code', $invoice_code)
+        ->firstOrFail();
+
+    return view('transaksi.invoice', compact('transaksi'));
+}
 
      // ==========================
     // SCAN INVOICE / QR CODE

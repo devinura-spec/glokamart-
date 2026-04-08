@@ -44,7 +44,7 @@ class RegisteredUserController extends Controller
         'address' => null,
         'city' => null,
         'postal_code' => null,
-        'phone' => null,
+        
         'photo' => null,
     ]);
 

@@ -32,17 +32,27 @@
                 <div class="md:col-span-2 space-y-6">
 
                     <!-- Alamat -->
-                    <div class="bg-white shadow rounded-xl p-5 border-l-4 border-orange-500">
-                        <h2 class="font-semibold text-lg mb-3 text-orange-600">
-                            📍 Alamat Pengiriman
-                        </h2>
-                        <p class="font-semibold">{{ auth()->user()->name }}</p>
-                        <p>{{ auth()->user()->address ?? 'Alamat belum diisi' }}</p>
-                        <p>{{ auth()->user()->phone ?? '-' }}</p>
-                        <a href="#" class="text-orange-500 text-sm font-medium">
-                            Ubah Alamat
-                        </a>
-                    </div>
+                    
+
+   <div class="bg-white shadow rounded-xl p-5 border-l-4 border-orange-500">
+    <h2 class="font-semibold text-lg mb-3 text-orange-600">
+        📍 Data Peminjaman & Alamat
+    </h2>
+
+    <!-- Info user lama -->
+    <p class="font-semibold">{{ auth()->user()->name }}</p>
+
+    <!-- Input Tanggal Peminjaman -->
+    <div class="mb-3">
+        <label for="borrow_date">Tanggal Peminjaman</label>
+        <input type="date" name="borrow_date" id="borrow_date"
+               value="{{ old('borrow_date') }}"
+               class="w-full border rounded px-3 py-2" required>
+    </div>
+
+    
+
+   
 
                     <!-- Produk -->
                     <div class="bg-white shadow rounded-xl p-5">

@@ -17,6 +17,7 @@ class Transaksi extends Model
         'total_price',
         'payment_method',
         'payment_status',
+        
     ];
 
     // Relasi ke Product

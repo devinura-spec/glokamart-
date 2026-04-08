@@ -24,14 +24,12 @@ use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\BannerController;
 
 use App\Http\Controllers\PetugasController;
-
 use App\Http\Controllers\Petugas\LaporanController;
 
 // ====================
 // HOME
 // ====================
 Route::get('/', [HomeController::class, 'index'])->name('home');
-
 
 // ====================
 // ADMIN
@@ -41,19 +39,17 @@ Route::middleware(['auth', 'admin'])
     ->name('admin.')
     ->group(function () {
 
-       Route::get('/dashboard', [DashboardController::class, 'index'])
-   ->name('dashboard');
-   
+        Route::get('/dashboard', [DashboardController::class, 'index'])
+            ->name('dashboard');
+        
         Route::resource('categories', CategoryController::class);
         Route::resource('brands', BrandController::class);
         Route::resource('products', AdminProductController::class);
-        // ORDERS ADMIN
-        // ORDERS ADMIN (hanya untuk memantau)
-Route::get('/orders', [\App\Http\Controllers\Admin\AdminOrderController::class, 'index'])
-    ->name('orders');
-    });
-   
 
+        // ORDERS ADMIN (hanya untuk memantau)
+        Route::get('/orders', [\App\Http\Controllers\Admin\AdminOrderController::class, 'index'])
+            ->name('orders');
+    });
 
 // ====================
 // USER PRODUCTS
@@ -67,7 +63,6 @@ Route::get('/kategori/{slug}', [ProductController::class, 'showCategory'])
 Route::get('/produk/{id}', [ProductController::class, 'show'])
     ->name('products.show');
 
-
 // ====================
 // SEMUA YANG BUTUH LOGIN
 // ====================
@@ -76,15 +71,16 @@ Route::middleware('auth')->group(function () {
     // ====================
     // TRANSAKSI / PINJAM
     // ====================
-    Route::get('/transaksi/{id}', [TransaksiController::class, 'create'])
-        ->name('transaksi.create');
+   Route::get('/transaksi/create/{id}', [TransaksiController::class, 'create'])
+    ->name('transaksi.create');
 
     Route::post('/transaksi', [TransaksiController::class, 'store'])
         ->name('transaksi.store');
 
-    Route::get('/transaksi/{id}/invoice', [TransaksiController::class, 'invoice'])
-        ->name('transaksi.invoice');
-
+    // HAPUS route duplikat id / gunakan invoice_code
+    Route::get('/transaksi/{invoice_code}/invoice', [TransaksiController::class, 'invoice'])
+        ->name('transaksi.invoice')
+        ->middleware('auth');
 
     // ====================
     // CART
@@ -98,7 +94,6 @@ Route::middleware('auth')->group(function () {
         [CartController::class, 'checkoutSelected'])
         ->name('cart.checkoutSelected');
 
-
     // ====================
     // CHECKOUT
     // ====================
@@ -111,7 +106,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/checkout/success', fn () => view('checkout-success'))
         ->name('checkout.success');
 
-
     // ====================
     // ORDERS
     // ====================
@@ -120,7 +114,6 @@ Route::middleware('auth')->group(function () {
 
     Route::get('/orders/{id}', [OrderController::class, 'show'])
         ->name('orders.show');
-
 
     // ====================
     // PROFILE
@@ -142,7 +135,6 @@ Route::middleware('auth')->group(function () {
 });
 
 // ====================
-/// ====================
 // PETUGAS
 // ====================
 Route::middleware(['auth','petugas'])
@@ -150,60 +142,57 @@ Route::middleware(['auth','petugas'])
     ->name('petugas.')
     ->group(function () {
 
-Route::get('/dashboard', [PetugasController::class, 'dashboard'])
-    ->name('dashboard');
+        Route::get('/dashboard', [PetugasController::class, 'dashboard'])
+            ->name('dashboard');
 
-       Route::get('/orders', [PetugasController::class, 'orders'])
-    ->name('orders');
-           
-Route::put('/orders/{id}/status', [PetugasController::class, 'updateStatus'])
-    ->name('orders.updateStatus'); // <<< ini yang bener
+        Route::get('/orders', [PetugasController::class, 'orders'])
+            ->name('orders');
 
-    Route::put('/transaksi/{id}/update-status', [PetugasController::class, 'updateStatus'])
-        ->name('transaksi.updateStatus');
+        Route::put('/orders/{id}/status', [PetugasController::class, 'updateStatus'])
+            ->name('orders.updateStatus');
 
-        // ✅ LIST CHAT
+        Route::put('/transaksi/{id}/update-status', [PetugasController::class, 'updateStatus'])
+            ->name('transaksi.updateStatus');
+
+        // LIST CHAT
         Route::get('/chat', [\App\Http\Controllers\PetugasChatController::class, 'index'])
             ->name('chat.index');
 
-        // ✅ DETAIL CHAT (INI YANG DIPINDAH)
+        // DETAIL CHAT
         Route::get('/chat/{user}', [\App\Http\Controllers\PetugasChatController::class, 'show'])
             ->name('chat.show');
 
-        // ✅ KIRIM PESAN
+        // KIRIM PESAN
         Route::post('/chat/store', [\App\Http\Controllers\PetugasChatController::class, 'store'])
             ->name('chat.store');
 
-        // 🔥 Route Laporan
-     Route::get('/laporan', [LaporanController::class, 'index'])
-        ->name('laporan'); // <-- pastikan cuma 'laporan', bukan 'petugas.laporan'
-        
-
-           
+        // LAPORAN
+        Route::get('/laporan', [LaporanController::class, 'index'])
+            ->name('laporan');
     });
+
 // ====================
 // CHAT USER
 // ====================
 Route::get('/chat-user', [ChatController::class, 'userChat'])->name('chat.user');
 Route::post('/chat-user/send', [ChatController::class, 'sendUser'])->name('chat.user.send');
 
-
-
+// ====================
+// ADMIN BANNER
+// ====================
 Route::prefix('admin')->group(function () {
     Route::get('/banner', [BannerController::class, 'index'])->name('admin.banner');
     Route::post('/banner/store', [BannerController::class, 'store'])->name('admin.banner.store');
     Route::delete('/banner/{id}', [BannerController::class, 'destroy'])->name('admin.banner.delete');
 });
 
+// ====================
 // Halaman scan QR / invoice
+// ====================
 Route::get('/scan/{kode}', [TransaksiController::class, 'scan'])
     ->name('transaksi.scan')
     ->middleware('auth');
 
-// Halaman invoice normal
-Route::get('/transaksi/{invoice_code}/invoice', [TransaksiController::class, 'invoice'])
-    ->name('transaksi.invoice')
-    ->middleware('auth');
 // ====================
 // AUTH (BREEZE)
 // ====================
