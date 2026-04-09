@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Glokamart</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Urbanist:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+    --primary:#0A2472;
+    --accent:#F5C542;
+}
+
+body {
+    font-family:'Urbanist',sans-serif;
+    margin:0;
+    background:#F9FAFB;
+}
+
+/* NAVBAR */
+.navbar {
+    background:#0A2472;
+    color:white;
+    padding:15px 20px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.navbar h2 { margin:0; }
+
+/* HERO */
+.hero {
+    text-align:center;
+    padding:60px 20px;
+    color:white;
+    background:linear-gradient(135deg,#0A2472,#1e3a8a);
+}
+
+.hero h1 { margin-bottom:10px; }
+
+/* KATEGORI */
+.categories {
+    display:flex;
+    justify-content:center;
+    gap:20px;
+    margin:30px 0;
+    flex-wrap:wrap;
+}
+
+.category {
+    background:white;
+    padding:20px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    cursor:pointer;
+    transition:0.3s;
+}
+
+.category:hover {
+    transform:translateY(-5px);
+    background:var(--accent);
+}
+
+/* PRODUK */
+.products {
+    padding:20px;
+    max-width:1000px;
+    margin:auto;
+}
+
+.grid {
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:20px;
+}
+
+.card {
+    background:white;
+    padding:15px;
+    border-radius:10px;
+    box-shadow:0 2px 8px rgba(0,0,0,0.05);
+    text-align:center;
+}
+
+.card img {
+    width:100%;
+    height:150px;
+    object-fit:cover;
+    border-radius:8px;
+}
+
+/* FOOTER */
+footer {
+    text-align:center;
+    padding:20px;
+    margin-top:40px;
+    background:white;
+}
+</style>
+</head>
+
+<body>
+
+<!-- NAVBAR -->
+<div class="navbar">
+    <h2>🛍️ Glokamart</h2>
+    <div>
+        <a href="#" style="color:white;margin-right:10px;">Login</a>
+        <a href="#" style="color:yellow;">Daftar</a>
+    </div>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+    <h1>Selamat Datang di Glokamart</h1>
+    <p>Sewa kamera & perlengkapan dengan mudah</p>
+</section>
+
+<!-- KATEGORI -->
+<div class="categories">
+    <div class="category">📷 Kamera</div>
+    <div class="category">🔍 Lensa</div>
+    <div class="category">🎒 Paket Sewa</div>
+</div>
+
+<!-- PRODUK -->
+<div class="products">
+    <h2 style="text-align:center;">Produk</h2>
+
+    <div class="grid">
+        <div class="card">
+            <img src="https://picsum.photos/300?1">
+            <h4>Kamera Sony</h4>
+            <p>Rp 150.000</p>
+        </div>
+
+        <div class="card">
+            <img src="https://picsum.photos/300?2">
+            <h4>Lensa Canon</h4>
+            <p>Rp 100.000</p>
+        </div>
+
+        <div class="card">
+            <img src="https://picsum.photos/300?3">
+            <h4>Paket Sewa</h4>
+            <p>Rp 250.000</p>
+        </div>
+    </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+    © 2026 Glokamart - devi nuraini
+</footer>
+
+</body>
+</html>
